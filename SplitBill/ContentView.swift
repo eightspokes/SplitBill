@@ -11,16 +11,29 @@ struct ContentView: View {
     @State private var checkAmount = 0.0
     @State private var numberOfPeople = 2
     @State private var tipPercentage = 20
+    @FocusState private var amountIsFocused: Bool // to remove keyboard when done
     let tipPercentages = [10,15,20,25,30,0]
     
+    
+    var totalPerPerson: Double {
+        let peopleCount = Double(numberOfPeople + 2)
+        let tip = Double(tipPercentage)
+        let result = (checkAmount + checkAmount * ( tip/100.0)) / peopleCount
+        return result
+    }
+    
+    var totalAmount: Double {
+        return checkAmount + checkAmount * ( Double(tipPercentage) / 100.0)
+    }
+    
     var body: some View {
-        
         
             NavigationView{
                 Form{
                     Section{
                         TextField("Check amount: ", value: $checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
                             .keyboardType(.decimalPad)
+                            .focused($amountIsFocused)
                     
                             
                         Picker("Number of people", selection: $numberOfPeople){
@@ -40,13 +53,31 @@ struct ContentView: View {
                         }
                         .pickerStyle(.segmented)
                     }
-                    Section("Check amount"){
-                        Text(checkAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
-                        }
+                    Section("Total amount"){
+                        Text(totalAmount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                    }
+                    Section("Amount per person"){
+                        Text(totalPerPerson, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                    }
                 }
                 .navigationTitle("SplitBill")
+                
+                //logic to hide keyboard when done
+                .toolbar{
+                    ToolbarItemGroup(placement: .keyboard){
+                        Spacer()
+                        Button("Done"){
+                            amountIsFocused = false
+                        }
+                    }
+                }
         }
     }
+}
+
+
+struct PickerView{
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
